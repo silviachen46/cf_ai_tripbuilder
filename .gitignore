@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Wrangler
+.wrangler/
+.mf/
+dist/
+worker/
+
+# Environment variables
+.dev.vars
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*~
+
+# Build outputs
+*.tsbuildinfo
+
+# Local development
+.cache/
+.temp/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets and credentials (important!)
+*.key
+*.pem
+secrets/
+credentials/
+

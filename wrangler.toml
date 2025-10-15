@@ -1,0 +1,18 @@
+name = "cf_ai_tripbuilder"
+main = "workers/index.ts"
+compatibility_date = "2025-10-14"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tripbuilder-db"
+database_id = "fa2fcfa3-2a83-41cf-a97b-415e7620932f"
+
+[assets]
+directory = "pages"
+
+[[durable_objects.bindings]]
+name = "SESSION_DO"
+class_name = "SessionDO"
+
+[dev]
+remote = false

@@ -1,0 +1,507 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>TripBuilder · Builder</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 0; }
+    
+    .navbar {
+      background: #111827;
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .navbar-brand {
+      font-size: 20px;
+      font-weight: bold;
+      margin-right: auto;
+    }
+    .navbar-link {
+      color: #9ca3af;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+    .navbar-link:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .navbar-link.active {
+      color: white;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .container {
+      padding: 20px;
+    }
+    .layout { display: grid; grid-template-columns: 260px 1fr; gap: 18px; }
+    .panel { border:1px solid #e5e7eb; border-radius:10px; padding:12px; }
+    .h { margin: 0 0 10px 0; font-size: 18px; }
+    .row { display:flex; gap:10px; margin: 6px 0; align-items:center; flex-wrap: wrap;}
+    input, button, textarea { font: inherit; }
+    input[type="text"], input[type="number"], textarea {
+      border:1px solid #d1d5db; border-radius:8px; padding:6px 8px;
+    }
+    button { border:1px solid #d1d5db; background:#fff; padding:6px 10px; border-radius:8px; cursor:pointer; }
+    button.primary { background:#111827; color:#fff; border-color:#111827; }
+    .timeline-day { margin-top:12px; }
+    .block { 
+      border:1px solid #e5e7eb; 
+      padding:10px; 
+      border-radius:10px; 
+      margin:8px 0; 
+      display:flex; 
+      justify-content:space-between; 
+      gap:10px; 
+      cursor: grab;
+      transition: all 0.2s ease;
+    }
+    .block:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    }
+    .block.dragging {
+      opacity: 0.5;
+      transform: rotate(2deg);
+      cursor: grabbing;
+    }
+    .block.drag-over {
+      border-color: #10b981;
+      background-color: #f0fdf4;
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+    
+    #timeline { 
+      max-height: 400px; 
+      overflow-y: auto; 
+      padding-right: 8px;
+    }
+    
+    #timeline::-webkit-scrollbar {
+      width: 8px;
+    }
+    #timeline::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    #timeline::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    #timeline::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+    .muted { color:#6b7280; font-size:12px; }
+    .list { 
+      list-style:none; 
+      padding-left:0; 
+      margin:0; 
+      max-height: 300px; 
+      overflow-y: auto; 
+    }
+    .list li { padding:8px; border-radius:8px; cursor:pointer; }
+    .list li:hover { background:#f3f4f6; }
+    
+    .list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    .list::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+    }
+    .list::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+    .right { text-align:right; }
+    .danger { color:#b91c1c; border-color:#fecaca; }
+    .grid2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; }
+    .grid5 { display:grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap:8px; }
+    .sep { height:1px; background:#eee; margin:10px 0; }
+  </style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="navbar-brand">🗺️ TripBuilder</div>
+    <a href="/builder" class="navbar-link active">📝 Builder</a>
+    <a href="/chat" class="navbar-link">💬 Chat</a>
+  </nav>
+
+  <div class="container">
+    <div class="layout">
+
+    <div class="panel">
+      <h3 class="h">Saved Trips</h3>
+      <ul id="saved" class="list"></ul>
+      <div class="sep"></div>
+      <button id="refreshTrips">Refresh</button>
+    </div>
+
+    <div class="panel">
+      <h3 class="h">Trip Params</h3>
+      <div class="grid5">
+        <div>Days<br><input id="days" type="number" value="3" /></div>
+        <div>Nights<br><input id="nights" type="number" value="2" /></div>
+        <div>Companions<br><input id="companions" type="text" placeholder="friends" /></div>
+        <div>City<br><input id="city" type="text" placeholder="Kyoto" /></div>
+        <div>Budget<br><input id="budget" type="text" placeholder="500 USD" /></div>
+      </div>
+      <div class="row">
+        <div style="flex: 1;">Style tags<br><input id="tags" type="text" placeholder="coffee,art,relaxed" /></div>
+      </div>
+      <div class="row">
+        <button id="gen" class="primary">Generate</button>
+        <div id="status" class="muted"></div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="row">
+        <h3 class="h" style="margin-right:auto">Timeline (Draft)</h3>
+        <button id="addBlock">+ Add custom block</button>
+      </div>
+
+      <div id="timeline"></div>
+
+      <div class="sep"></div>
+      <div class="right">
+        <button id="save" class="primary">Save Trip</button>
+      </div>
+
+      <div id="customForm" class="panel" style="display:none; margin-top:12px;">
+        <h3 class="h">Add Block</h3>
+        <div class="grid2">
+          <div>Day<br><input id="c-day" type="number" min="1" value="1" /></div>
+          <div>Time<br><input id="c-time" type="text" placeholder="07:30" /></div>
+          <div style="grid-column: span 2;">Title<br><input id="c-title" type="text" placeholder="Morning coffee" /></div>
+          <div style="grid-column: span 2;">Place<br><input id="c-place" type="text" placeholder="Blue Bottle" /></div>
+          <div style="grid-column: span 2;">Tags<br><input id="c-tags" type="text" placeholder="coffee,morning,walk" /></div>
+        </div>
+        <div class="row right">
+          <button id="c-cancel" class="danger">Cancel</button>
+          <button id="c-save" class="primary">Add</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+let plan = [];   
+let tripId = null;
+
+const $ = id => document.getElementById(id);
+
+async function listTrips() {
+  const res = await fetch('/api/trips');
+  const data = await res.json();
+  const ul = $('saved'); ul.innerHTML = '';
+  (data.trips || []).forEach(t => {
+    const li = document.createElement('li');
+    li.style.display = 'flex';
+    li.style.justifyContent = 'space-between';
+    li.style.alignItems = 'center';
+    
+    const tripInfo = document.createElement('span');
+    tripInfo.textContent = `${t.title || t.city || 'Trip'} · ${t.created_at.slice(0,10)} · ${t.id.slice(0,8)}`;
+    tripInfo.style.cursor = 'pointer';
+    tripInfo.onclick = () => loadTrip(t.id);
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '×';
+    deleteBtn.className = 'danger';
+    deleteBtn.style.fontSize = '16px';
+    deleteBtn.style.padding = '2px 6px';
+    deleteBtn.style.marginLeft = '8px';
+    deleteBtn.onclick = (e) => {
+      e.stopPropagation(); 
+      deleteTrip(t.id);
+    };
+    
+    li.appendChild(tripInfo);
+    li.appendChild(deleteBtn);
+    ul.appendChild(li);
+  });
+}
+
+async function loadTrip(id) {
+  const res = await fetch(`/api/itinerary/load?trip_id=${encodeURIComponent(id)}`);
+  const data = await res.json();
+  tripId = data.trip?.id || id;
+  plan = data.plan || [];
+  plan.forEach(day => {
+    day.blocks.sort((a,b)=> (a.time||'').localeCompare(b.time||'') );
+  });
+  $('status').textContent = `Loaded trip ${tripId.slice(0,8)}`;
+  render();
+}
+
+$('refreshTrips').onclick = listTrips;
+
+async function deleteTrip(tripIdToDelete) {
+  if (!confirm('Are you sure you want to delete this trip? This action cannot be undone.')) {
+    return;
+  }
+  
+  try {
+    const res = await fetch('/api/trips/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trip_id: tripIdToDelete })
+    });
+    
+    const data = await res.json();
+    
+    if (data.ok) {
+      $('status').textContent = 'Trip deleted successfully ✅';
+      if (tripIdToDelete === tripId) {
+        plan = [];
+        tripId = null;
+        render();
+      }
+      await listTrips();
+    } else {
+      alert('Failed to delete trip: ' + (data.error || 'Unknown error'));
+    }
+  } catch (error) {
+    console.error('Delete trip error:', error);
+    alert('Failed to delete trip. Please try again.');
+  }
+}
+
+$('gen').onclick = async () => {
+  $('status').textContent = 'Generating...';
+  const res = await fetch('/api/itinerary/generate', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      days:+$('days').value, nights:+$('nights').value,
+      companions:$('companions').value || 'friends',
+      city:$('city').value, 
+      budget:$('budget').value || '',
+      style_tags:$('tags').value.split(',').map(s=>s.trim()).filter(Boolean)
+    })
+  });
+  const data = await res.json();
+  plan = data.plan || [];
+  plan.forEach(day => {
+    day.blocks.sort((a,b)=> (a.time||'').localeCompare(b.time||'') );
+  });
+  tripId = null; 
+  $('status').textContent = 'Generated a draft. You can edit blocks.';
+  render();
+};
+
+$('save').onclick = async () => {
+  const trip = {
+    title: `${$('city').value || 'Trip'}`,
+    days:+$('days').value, nights:+$('nights').value,
+    companions:$('companions').value || 'friends',
+    budget:$('budget').value || '',
+    style_tags:$('tags').value.split(',').map(s=>s.trim()).filter(Boolean),
+    city:$('city').value, country:''
+  };
+  const res = await fetch('/api/itinerary/save', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ trip, plan })
+  });
+  const data = await res.json();
+  if (data.ok) {
+    tripId = data.trip_id;
+    $('status').textContent = `Saved trip ${tripId.slice(0,8)} ✅`;
+    await listTrips();
+  } else {
+    alert('Save failed');
+  }
+};
+
+$('addBlock').onclick = () => {
+  $('customForm').style.display = 'block';
+};
+$('c-cancel').onclick = () => {
+  $('customForm').style.display = 'none';
+};
+$('c-save').onclick = () => {
+  const d = +$('c-day').value;
+  const time = $('c-time').value.trim();
+  const title = $('c-title').value.trim();
+  const place = $('c-place').value.trim();
+  const tags = $('c-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  if (!d || !time || !title) return alert('Day, Time, Title are required');
+
+  let day = plan.find(x => x.day === d);
+  if (!day) { day = { day:d, blocks: [] }; plan.push(day); }
+  day.blocks.push({ time, title, place_name:place, tags, est_duration:60 });
+
+  $('customForm').style.display = 'none';
+  $('c-time').value = ''; $('c-title').value = ''; $('c-place').value = ''; $('c-tags').value = '';
+  render();
+};
+
+function render(){
+  plan.sort((a,b)=>a.day-b.day);
+  const root = $('timeline'); root.innerHTML='';
+  for(const d of plan){
+    const dayWrap = document.createElement('div');
+    dayWrap.className = 'timeline-day';
+    const dayTitle = document.createElement('h4');
+    dayTitle.textContent = `Day ${d.day}`;
+    dayWrap.appendChild(dayTitle);
+
+
+    for (let i=0;i<d.blocks.length;i++){
+      const b = d.blocks[i];
+      const el = document.createElement('div'); 
+      el.className='block';
+      el.draggable = true;
+      el.dataset.dayIndex = d.day;
+      el.dataset.blockIndex = i;
+      
+      const left = document.createElement('div');
+      left.innerHTML = `<div><strong>${b.time || '??:??'}</strong> · ${b.title}${b.place_name?(' · '+b.place_name):''}</div>
+                        <div class="muted">${(b.tags||[]).join(', ')}</div>`;
+      const right = document.createElement('div');
+      const btn = document.createElement('button');
+      btn.textContent = '×';
+      btn.className = 'danger';
+      btn.onclick = () => { d.blocks.splice(i,1); if (d.blocks.length===0) {
+        
+        const idx = plan.findIndex(x=>x.day===d.day);
+        if (idx>=0) plan.splice(idx,1);
+      } render(); };
+      right.appendChild(btn);
+      el.appendChild(left); el.appendChild(right);
+      
+      
+      addDragListeners(el, d.day, i);
+      
+      dayWrap.appendChild(el);
+    }
+    root.appendChild(dayWrap);
+  }
+}
+
+function addDragListeners(element, dayIndex, blockIndex) {
+  element.addEventListener('dragstart', (e) => {
+    element.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', JSON.stringify({
+      dayIndex: dayIndex,
+      blockIndex: blockIndex
+    }));
+  });
+
+  element.addEventListener('dragend', (e) => {
+    element.classList.remove('dragging');
+    
+    document.querySelectorAll('.block.drag-over').forEach(el => {
+      el.classList.remove('drag-over');
+    });
+  });
+
+  element.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    element.classList.add('drag-over');
+  });
+
+  element.addEventListener('dragleave', (e) => {
+    element.classList.remove('drag-over');
+  });
+
+  element.addEventListener('drop', (e) => {
+    e.preventDefault();
+    element.classList.remove('drag-over');
+    
+    const dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
+    const sourceDayIndex = dragData.dayIndex;
+    const sourceBlockIndex = dragData.blockIndex;
+    const targetDayIndex = parseInt(element.dataset.dayIndex);
+    const targetBlockIndex = parseInt(element.dataset.blockIndex);
+    
+    console.log('Drop event:', {
+      source: { day: sourceDayIndex, block: sourceBlockIndex },
+      target: { day: targetDayIndex, block: targetBlockIndex }
+    });
+    
+    
+    if (sourceDayIndex === targetDayIndex && sourceBlockIndex === targetBlockIndex) {
+      console.log('Same position, no move needed');
+      return;
+    }
+    
+    
+    console.log('Executing move...');
+    moveBlock(sourceDayIndex, sourceBlockIndex, targetDayIndex, targetBlockIndex);
+  });
+}
+
+function moveBlock(sourceDayIndex, sourceBlockIndex, targetDayIndex, targetBlockIndex) {
+  console.log('moveBlock called:', { sourceDayIndex, sourceBlockIndex, targetDayIndex, targetBlockIndex });
+  
+  
+  const sourceDay = plan.find(d => d.day === sourceDayIndex);
+  const targetDay = plan.find(d => d.day === targetDayIndex);
+  
+  if (!sourceDay || !targetDay) {
+    console.log('Day not found:', { sourceDay: !!sourceDay, targetDay: !!targetDay });
+    return;
+  }
+  
+  
+  const blockToMove = sourceDay.blocks[sourceBlockIndex];
+  if (!blockToMove) {
+    console.log('Block not found at index:', sourceBlockIndex);
+    return;
+  }
+  
+  console.log('Moving block:', blockToMove.title);
+  
+
+  if (sourceDayIndex === targetDayIndex) {
+    console.log('Same day move');
+    sourceDay.blocks.splice(sourceBlockIndex, 1);
+    const adjustedTargetIndex = sourceBlockIndex < targetBlockIndex ? targetBlockIndex - 1 : targetBlockIndex;
+    sourceDay.blocks.splice(adjustedTargetIndex, 0, blockToMove);
+    reorderAndUpdateTimes(sourceDay);
+  } else {
+    console.log('Cross day move');
+    sourceDay.blocks.splice(sourceBlockIndex, 1);
+    targetDay.blocks.splice(targetBlockIndex, 0, blockToMove);
+    
+    reorderAndUpdateTimes(sourceDay);
+    reorderAndUpdateTimes(targetDay);
+  }
+  
+  console.log('Move completed, re-rendering...');
+  render();
+}
+
+function reorderAndUpdateTimes(day) {
+  
+  const startTime = 7 * 60; // 7:00 AM in minutes
+  const interval = 30; // 30 minutes
+  
+  day.blocks.forEach((block, index) => {
+    const minutes = startTime + (index * interval);
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    block.time = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+  });
+  
+  console.log('Updated times for day', day.day, ':', day.blocks.map(b => ({ title: b.title, time: b.time })));
+}
+
+listTrips();
+</script>
+  </div> 
+</body>
+</html>

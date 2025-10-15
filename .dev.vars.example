@@ -1,0 +1,5 @@
+# Local development environment variables
+# Copy this file to .dev.vars and fill in your actual values
+
+GROQ_API_KEY=your_groq_api_key_here
+
