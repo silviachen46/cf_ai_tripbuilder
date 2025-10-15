@@ -1,4 +1,5 @@
 # 🗺️ TripBuilder
+<img width="1279" height="668" alt="image" src="https://github.com/user-attachments/assets/d17e5b78-d290-4172-8539-7653774519ec" />
 
 An AI-powered travel planning application built with Cloudflare Workers, D1 Database, and Groq API.
 
