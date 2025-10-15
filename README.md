@@ -1,6 +1,9 @@
 # 🗺️ TripBuilder
 The deployed version is LIVE here: [cf_ai_tripbuilder](https://cf_ai_tripbuilder.silviachen93032.workers.dev/)
 
+
+<img width="1280" height="676" alt="image" src="https://github.com/user-attachments/assets/b165b64b-37b4-4837-9f79-204979467628" />
+
 Trip Planner
 <img width="1279" height="668" alt="image" src="https://github.com/user-attachments/assets/d17e5b78-d290-4172-8539-7653774519ec" />
 Chat
